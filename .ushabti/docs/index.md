@@ -12,4 +12,4 @@ An MCP server written in Swift to expose macOS Spotlight functionality to LLMs.
 
 ## Table of Contents
 
-<!-- Populated by Surveyor -->
+- [Search Module](search-module.md) - Spotlight query engine architecture, types, and usage

@@ -1,0 +1,91 @@
+phase:
+  id: "0002"
+  slug: spotlight-query-engine
+  title: Spotlight Query Engine
+  status: complete
+
+steps:
+  - id: S001
+    title: Create Types.swift with SearchResult and MetadataValue
+    implemented: true
+    reviewed: true
+    notes: "Created SearchResult and MetadataValue types with Equatable, Codable, and Sendable conformance. Both types are immutable value types. DEFECT: Codable methods violate 5-line rule and lack test coverage."
+    touched:
+      - Sources/SpotlightMCP/Search/Types.swift
+
+  - id: S002
+    title: Create MetadataItem.swift with MDItem wrapper
+    implemented: true
+    reviewed: true
+    notes: "Created MetadataItem wrapper with getAttribute and getAllAttributes methods. Handles type conversion from MDItem attributes to MetadataValue. Uses @preconcurrency for CoreServices import. DEFECT: Methods violate 5-line rule."
+    touched:
+      - Sources/SpotlightMCP/Search/MetadataItem.swift
+
+  - id: S003
+    title: Create SpotlightQuery.swift with MDQuery wrapper
+    implemented: true
+    reviewed: true
+    notes: "Created SpotlightQuery wrapper with synchronous query execution. Manages MDQuery lifecycle, sets scope, executes, and collects results into SearchResult array. DEFECT: performQuery method violates 5-line rule."
+    touched:
+      - Sources/SpotlightMCP/Search/SpotlightQuery.swift
+
+  - id: S004
+    title: Create KindMapping.swift with UTI content type mapping
+    implemented: true
+    reviewed: true
+    notes: "Created KindMapping with predicate(forKind:) method that maps user-friendly kind names to UTI predicates. Supports document, image, video, audio, pdf, and code."
+    touched:
+      - Sources/SpotlightMCP/Search/KindMapping.swift
+
+  - id: S005
+    title: Create QueryBuilder.swift with predicate construction
+    implemented: true
+    reviewed: true
+    notes: "Created QueryBuilder with naturalText, rawPredicate, and kind methods. Provides safe predicate construction with typed error handling."
+    touched:
+      - Sources/SpotlightMCP/Search/QueryBuilder.swift
+
+  - id: S006
+    title: Write unit tests for QueryBuilder and KindMapping
+    implemented: true
+    reviewed: true
+    notes: "Created comprehensive unit tests for QueryBuilder and KindMapping. All 13 tests pass, covering predicate construction, kind mapping, error handling, and edge cases."
+    touched:
+      - Package.swift
+      - Tests/SpotlightMCPTests/Search/QueryBuilderTests.swift
+      - Tests/SpotlightMCPTests/Search/KindMappingTests.swift
+
+  - id: S007
+    title: Write integration tests for Spotlight query execution
+    implemented: true
+    reviewed: true
+    notes: "Created integration tests that query real Spotlight index. Tests verify query execution, result collection, and metadata extraction. All tests are idempotent and use project files as fixtures."
+    touched:
+      - Tests/SpotlightMCPTests/Search/SpotlightQueryTests.swift
+
+  - id: S008
+    title: Add tests for MetadataValue Codable conformance
+    implemented: true
+    reviewed: true
+    notes: "Follow-up step added by Overseer to address L20 violation (missing test coverage for public Codable methods). Created TypesTests.swift with 17 tests covering all Codable methods: encode/decode for all MetadataValue cases, round-trip tests, and error handling. All tests pass. VERIFIED GREEN."
+    touched:
+      - Tests/SpotlightMCPTests/Search/TypesTests.swift
+
+  - id: S009
+    title: Refactor methods to comply with 5-line limit
+    implemented: true
+    reviewed: true
+    notes: "Follow-up step added by Overseer to address Sandi Metz 5-line rule violations in Types.swift, MetadataItem.swift, and SpotlightQuery.swift. Refactored all violating methods by extracting logic into smaller helper methods. All methods now ≤5 lines. All tests still pass. VERIFIED GREEN."
+    touched:
+      - Sources/SpotlightMCP/Search/Types.swift
+      - Sources/SpotlightMCP/Search/MetadataItem.swift
+      - Sources/SpotlightMCP/Search/SpotlightQuery.swift
+
+  - id: S010
+    title: Document Search module in .ushabti/docs
+    implemented: true
+    reviewed: true
+    notes: "Follow-up step added by Overseer to address L29/L32 violation (documentation not reconciled with code changes). Created comprehensive search-module.md documenting all public types, error types, design decisions, usage examples, testing strategy, and future enhancements. Updated index.md to link to new documentation. VERIFIED GREEN."
+    touched:
+      - .ushabti/docs/search-module.md
+      - .ushabti/docs/index.md

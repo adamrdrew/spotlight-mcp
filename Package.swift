@@ -27,6 +27,15 @@ let package = Package(
             swiftSettings: [
                 .swiftLanguageMode(.v6)
             ]
+        ),
+        .testTarget(
+            name: "SpotlightMCPTests",
+            dependencies: [
+                "SpotlightMCP"
+            ],
+            swiftSettings: [
+                .swiftLanguageMode(.v6)
+            ]
         )
     ]
 )
