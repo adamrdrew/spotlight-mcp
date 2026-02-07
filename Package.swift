@@ -16,13 +16,18 @@ let package = Package(
         .package(
             url: "https://github.com/modelcontextprotocol/swift-sdk",
             from: "0.1.0"
+        ),
+        .package(
+            url: "https://github.com/apple/swift-log.git",
+            from: "1.0.0"
         )
     ],
     targets: [
         .executableTarget(
             name: "SpotlightMCP",
             dependencies: [
-                .product(name: "MCP", package: "swift-sdk")
+                .product(name: "MCP", package: "swift-sdk"),
+                .product(name: "Logging", package: "swift-log")
             ],
             swiftSettings: [
                 .swiftLanguageMode(.v6)

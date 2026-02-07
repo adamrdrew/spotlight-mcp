@@ -1,16 +1,10 @@
 # Project Documentation
 
-> **Scaffold documentation** — This is minimal documentation created during project bootstrap. Run **Ushabti Surveyor** to generate comprehensive project documentation.
+## Spotlight MCP — macOS Spotlight MCP Server
 
-## Project Name
-
-Spotlight MCP - macOS Spotlight MCP Server
-
-## Description
-
-An MCP server written in Swift to expose macOS Spotlight functionality to LLMs.
+An MCP server in Swift that exposes macOS Spotlight search to LLMs via stdio JSON-RPC. Four tools: `search`, `get_metadata`, `search_by_kind`, `recent_files`.
 
 ## Table of Contents
 
-- [Search Module](search-module.md) - Spotlight query engine architecture, types, and usage
-- [Tool Layer](tool-layer.md) - MCP tool handlers, routing, pagination, and error handling
+- [Search Module](search-module.md) — Spotlight query engine: SpotlightQuery, QueryBuilder, MetadataItem, KindMapping, types
+- [Tool Layer](tool-layer.md) — MCP tool handlers, routing, argument validation, path sanitization, pagination, logging, and error handling

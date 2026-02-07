@@ -4,6 +4,15 @@ import UniformTypeIdentifiers
 
 /// Maps user-friendly kind names to UTI-based predicates.
 public struct KindMapping {
+    public static let validKinds: [String] = [
+        "document",
+        "image",
+        "video",
+        "audio",
+        "pdf",
+        "code"
+    ]
+
     public static func predicate(forKind kind: String) -> NSPredicate? {
         guard let uti = mapKindToUTI(kind) else {
             return nil

@@ -11,7 +11,7 @@ An MCP server in Swift that exposes macOS Spotlight search to LLMs via stdio JSO
 ```bash
 swift build                    # Debug build
 swift build -c release         # Release build
-swift test                     # Run all tests (79 tests, Swift Testing framework)
+swift test                     # Run all tests (90 tests, Swift Testing framework)
 swift test --filter SearchTool # Run tests matching a name
 ```
 
@@ -24,17 +24,18 @@ Two layers under `Sources/SpotlightMCP/`:
 - `QueryBuilder` constructs predicates from structured params (text, kind, date)
 - `MetadataItem` extracts MDItem attributes into `MetadataValue` enum
 - `KindMapping` maps friendly names ("image", "code") to UTI predicates
-- `Types.swift` defines `SearchResult` and `MetadataValue` with custom Codable
+- `Types.swift` defines `SearchResult` and `MetadataValue`; `MetadataValue+Codable.swift` has custom Codable
 
-**Tools/** — MCP tool handlers (Phase 3). Connects MCP protocol to Search layer:
-- `ToolRouter` dispatches `CallTool` by name to the right handler
+**Tools/** — MCP tool handlers (Phase 3) + hardening (Phase 4). Connects MCP protocol to Search layer:
+- `ToolRouter` dispatches `CallTool` by name to the right handler; logs invocations via swift-log
 - Each tool struct has a `handle(ArgumentParser) throws(ToolError) -> CallTool.Result`
-- `ArgumentParser` extracts/validates args from `[String: Value]`
+- `ArgumentParser` extracts/validates args from `[String: Value]` (absolute path enforcement, scope validation)
+- `PathSanitizer` resolves symlinks and enforces scope boundaries (L07)
 - `PaginationConfig` enforces limits (default 100, max 1000)
 - `ResultFormatter` serializes results as JSON with ISO 8601 dates
 - `ToolSchemas` + `ToolSchemas+Definitions` define ListTools responses
 
-**main.swift** — Wires Server, ToolSchemas, ToolRouter, and StdioTransport.
+**main.swift** — Wires Server, ToolSchemas, ToolRouter (with Logger), and StdioTransport.
 
 ## Key Constraint: MDQuery vs NSPredicate
 

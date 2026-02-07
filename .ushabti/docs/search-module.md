@@ -81,7 +81,7 @@ public enum MetadataValue: Equatable, Codable, Sendable {
 
 **Conformances**: Equatable, Codable, Sendable
 
-**Codable Implementation**: Uses `SingleValueContainer` for direct encoding/decoding to JSON primitives.
+**Codable Implementation**: Custom Codable conformance in `MetadataValue+Codable.swift` uses `SingleValueContainer` for direct encoding/decoding to JSON primitives.
 
 **Usage**:
 ```swift
@@ -452,13 +452,6 @@ let combined = QueryBuilder.combine([
 ], using: .and)
 ```
 
-### Result Pagination
-
-Pagination logic is deferred to MCP tool integration. Future phases will add:
-- Limit/offset parameters
-- Cursor-based pagination
-- Result streaming
-
 ### Metadata Attribute Typing
 
 Future phases may add typed attribute accessors to avoid string-based attribute lookups:
@@ -469,10 +462,6 @@ extension SearchResult {
     var fileSize: Int? { ... }
 }
 ```
-
-### Path Sanitization Integration
-
-Future phases will integrate path sanitization and scope validation to enforce security constraints (L05, L07).
 
 ## Related Documentation
 

@@ -11,7 +11,7 @@ struct SearchTool: Sendable {
 
     func handle(_ args: ArgumentParser) throws(ToolError) -> CallTool.Result {
         let queryText = try args.requireString("query")
-        let scopePath = try args.requireString("scope")
+        let scopePath = try args.requireValidatedScope("scope")
         let pagination = PaginationConfig(requested: args.optionalInt("limit"))
         let results = try executeSearch(queryText, scopePath)
         let paginated = pagination.apply(to: results)

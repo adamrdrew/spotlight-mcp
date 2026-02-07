@@ -28,7 +28,7 @@ No other dependencies. Swift Package Manager handles the one external package (t
 # Build
 swift build
 
-# Run tests (79 tests)
+# Run tests (90 tests)
 swift test
 
 # The binary is at:
@@ -96,10 +96,13 @@ Find recently modified files within a scoped directory.
 ## Security Model
 
 - **Scoped searches only** — every search tool requires an explicit directory scope. No system-wide searches are permitted.
+- **Path sanitization** — all file paths are validated to prevent directory traversal attacks. Symbolic links are resolved and validated within scope.
+- **Input validation** — all tool inputs are validated. Empty queries, relative paths, invalid kind names, and out-of-range limits are rejected with descriptive errors.
 - **Read-only** — all tools are read-only (annotated with `readOnlyHint: true`). Nothing is created, modified, or deleted.
 - **Absolute paths** — all file paths in responses are absolute. No relative paths are accepted or returned.
 - **No elevated privileges** — the server runs with the same permissions as the user who launched it.
 - **TCC boundaries respected** — Spotlight honors macOS privacy controls. If the user hasn't granted access to a directory, results from that directory won't appear.
+- **Minimal logging** — search results and file metadata are not logged beyond operational events for observability.
 
 ## Development
 
@@ -108,7 +111,7 @@ Find recently modified files within a scoped directory.
 ```bash
 swift build                        # Debug build
 swift build -c release             # Release build
-swift test                         # Run all 79 tests
+swift test                         # Run all 90 tests
 swift test --filter SearchTool     # Run tests matching a name
 ```
 
@@ -122,6 +125,7 @@ Sources/SpotlightMCP/
 │   ├── QueryBuilder.swift         # Predicate construction from structured params
 │   ├── MetadataItem.swift         # MDItem attribute extraction
 │   ├── KindMapping.swift          # Friendly names → UTI type predicates
+│   ├── MetadataValue+Codable.swift # Custom Codable for MetadataValue enum
 │   └── Types.swift                # SearchResult, MetadataValue types
 └── Tools/                         # MCP tool handlers
     ├── ToolRouter.swift           # Dispatches CallTool to correct handler
@@ -130,7 +134,9 @@ Sources/SpotlightMCP/
     ├── SearchByKindTool.swift     # search_by_kind tool implementation
     ├── RecentFilesTool.swift      # recent_files tool implementation
     ├── ToolSchemas.swift          # Tool definitions for ListTools
+    ├── ToolSchemas+Definitions.swift # Tool schema definitions (split for Sandi Metz)
     ├── ArgumentParser.swift       # Extracts/validates MCP arguments
+    ├── PathSanitizer.swift        # Path validation and sanitization
     ├── PaginationConfig.swift     # Result limit enforcement
     ├── ResultFormatter.swift      # JSON serialization of results
     └── ToolError.swift            # Typed error enum
@@ -144,9 +150,49 @@ Tests/SpotlightMCPTests/
 
 This project enforces [Sandi Metz's rules](https://thoughtbot.com/blog/sandi-metz-rules-for-developers): types are capped at 100 lines, methods at 5 lines, and parameter lists at 4. It uses Swift 6 strict concurrency, typed throws, and value semantics throughout. See `.ushabti/style.md` for the full style guide.
 
+## Troubleshooting
+
+### Server doesn't start
+
+- Verify the binary path in your MCP client configuration is correct and absolute
+- Check that the binary has execute permissions: `chmod +x .build/release/spotlight-mcp`
+- Look for errors in your MCP client's logs
+
+### Empty search results
+
+- Ensure Spotlight has indexed the target directory (check System Settings > Siri & Spotlight > Search Results)
+- Verify the scope path exists and is accessible
+- Check TCC permissions (System Settings > Privacy & Security > Files and Folders)
+
+### "Scope is not a directory" error
+
+- Ensure the `scope` parameter points to a directory, not a file
+- Verify the directory exists: `ls -ld /path/to/scope`
+
+### "Path outside scope" error
+
+- All file paths must be within the declared scope directory
+- Symbolic links are resolved; ensure the resolved path is within scope
+
+### "Unknown kind" error
+
+- Valid kinds are: `document`, `image`, `video`, `audio`, `pdf`, `code`
+- Kind names are case-insensitive
+
+### "Invalid ISO 8601 date" error
+
+- Dates must be in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`
+- Example: `2024-01-15T10:30:00Z`
+
+### "path must be an absolute path" error
+
+- All paths must start with `/`
+- Relative paths (e.g., `./file.txt`, `../dir`) are rejected for security
+
 ## Technical Details
 
 - **MCP SDK**: [modelcontextprotocol/swift-sdk](https://github.com/modelcontextprotocol/swift-sdk) v0.1.0+
+- **Logging**: [apple/swift-log](https://github.com/apple/swift-log) v1.0.0+
 - **Transport**: Stdio (JSON-RPC over stdin/stdout)
 - **Swift language mode**: Swift 6 (strict concurrency)
 - **Spotlight APIs**: CoreServices MDQuery/MDItem (public APIs only)

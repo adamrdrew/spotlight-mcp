@@ -10,7 +10,7 @@ struct RecentFilesTool: Sendable {
     }
 
     func handle(_ args: ArgumentParser) throws(ToolError) -> CallTool.Result {
-        let scopePath = try args.requireString("scope")
+        let scopePath = try args.requireValidatedScope("scope")
         let pagination = PaginationConfig(requested: args.optionalInt("limit"))
         let isoDate = try resolveSinceDate(args.optionalString("since"))
         let results = try executeQuery(isoDate, scopePath)

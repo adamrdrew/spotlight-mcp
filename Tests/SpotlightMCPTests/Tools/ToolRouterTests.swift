@@ -1,10 +1,11 @@
 import Testing
+import Logging
 import MCP
 @testable import SpotlightMCP
 
 @Suite("ToolRouter Tests")
 struct ToolRouterTests {
-    let router = ToolRouter()
+    let router = ToolRouter(logger: Logger(label: "test"))
 
     @Test("routes unknown tool to error")
     func routesUnknownToolToError() {

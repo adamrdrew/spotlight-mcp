@@ -11,7 +11,7 @@ struct SearchByKindTool: Sendable {
 
     func handle(_ args: ArgumentParser) throws(ToolError) -> CallTool.Result {
         let kind = try args.requireString("kind")
-        let scopePath = try args.requireString("scope")
+        let scopePath = try args.requireValidatedScope("scope")
         let pagination = PaginationConfig(requested: args.optionalInt("limit"))
         let results = try executeKindSearch(kind, scopePath)
         let paginated = pagination.apply(to: results)
@@ -25,7 +25,9 @@ extension SearchByKindTool {
         _ scopePath: String
     ) throws(ToolError) -> [SearchResult] {
         guard let predicate = builder.kind(kind) else {
-            throw .invalidArgument("Unknown kind: \(kind)")
+            let valid = KindMapping.validKinds.joined(separator: ", ")
+            let msg = "Unknown kind: \(kind). Valid kinds: \(valid)"
+            throw .invalidArgument(msg)
         }
         let scope = [URL(fileURLWithPath: scopePath)]
         let query = SpotlightQuery(predicate: predicate, scope: scope)

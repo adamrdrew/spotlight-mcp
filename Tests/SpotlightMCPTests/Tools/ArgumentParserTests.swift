@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 import MCP
 @testable import SpotlightMCP
@@ -63,5 +64,44 @@ struct ArgumentParserTests {
     func initHandlesNilArguments() {
         let parser = ArgumentParser(nil)
         #expect(parser.optionalString("any") == nil)
+    }
+
+    @Test("requireAbsolutePath accepts absolute path")
+    func requireAbsolutePathAcceptsAbsolutePath() throws {
+        let parser = ArgumentParser(["path": .string("/tmp/test")])
+        let result = try parser.requireAbsolutePath("path")
+        #expect(result == "/tmp/test")
+    }
+
+    @Test("requireAbsolutePath rejects relative path")
+    func requireAbsolutePathRejectsRelativePath() {
+        let parser = ArgumentParser(["path": .string("relative/path")])
+        #expect(throws: ToolError.invalidArgument("path must be an absolute path (starting with /)")) {
+            try parser.requireAbsolutePath("path")
+        }
+    }
+
+    @Test("requireAbsolutePath rejects path with ../")
+    func requireAbsolutePathRejectsPathWithDotDot() {
+        let parser = ArgumentParser(["path": .string("../etc/passwd")])
+        #expect(throws: ToolError.invalidArgument("path must be an absolute path (starting with /)")) {
+            try parser.requireAbsolutePath("path")
+        }
+    }
+
+    @Test("requireValidatedScope accepts valid directory")
+    func requireValidatedScopeAcceptsValidDirectory() throws {
+        let parser = ArgumentParser(["scope": .string("/tmp")])
+        let result = try parser.requireValidatedScope("scope")
+        #expect(result == "/tmp")
+    }
+
+    @Test("requireValidatedScope rejects non-existent directory")
+    func requireValidatedScopeRejectsNonExistentDirectory() {
+        let path = "/nonexistent/\(UUID().uuidString)"
+        let parser = ArgumentParser(["scope": .string(path)])
+        #expect(throws: ToolError.self) {
+            try parser.requireValidatedScope("scope")
+        }
     }
 }

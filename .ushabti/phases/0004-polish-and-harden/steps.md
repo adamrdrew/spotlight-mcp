@@ -239,3 +239,38 @@
 - `swift build -c release` succeeds
 - Server starts and responds to MCP requests
 - All four tools work correctly
+
+---
+
+## S014: Fix Sandi Metz Violations in Search Module
+
+**Intent**: Bring Types.swift, SpotlightQuery.swift, and MetadataItem.swift into compliance with the 100-line limit.
+
+**Work**:
+- Refactor Types.swift (133 lines) to split MetadataValue Codable implementation into separate file
+- Refactor SpotlightQuery.swift (108 lines) to extract 8+ lines into helper methods or extensions
+- Refactor MetadataItem.swift (108 lines) to extract 8+ lines into helper methods or extensions
+- Verify all 90 tests still pass after refactoring
+- Verify line counts are ≤100 (excluding blanks and comments)
+
+**Done when**:
+- Types.swift ≤100 lines (excluding blanks/comments)
+- SpotlightQuery.swift ≤100 lines (excluding blanks/comments)
+- MetadataItem.swift ≤100 lines (excluding blanks/comments)
+- All tests pass
+- No functional changes, only structural refactoring
+
+---
+
+## S015: Document Manual Testing or Defer
+
+**Intent**: Either document that manual Claude Desktop testing was performed, or explicitly defer it with justification.
+
+**Work**:
+- If manual testing was performed: Document tool invocations, responses, and error handling verification in progress.yaml S010 notes
+- If manual testing was not performed: Update progress.yaml S010 notes to indicate testing is deferred and provide justification (e.g., "Automated tests provide sufficient coverage; manual testing deferred to user acceptance")
+
+**Done when**:
+- S010 notes in progress.yaml either:
+  - Document evidence of manual testing (which tools tested, what responses observed, any issues found)
+  - OR explicitly state testing is deferred with clear justification

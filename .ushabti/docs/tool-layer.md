@@ -14,11 +14,14 @@ The layer is located in `Sources/SpotlightMCP/Tools/` and consists of tool handl
 MCP Client → JSON-RPC → Server (main.swift)
   → ListTools handler → ToolSchemas.all()
   → CallTool handler → ToolRouter.route()
+    → Logger (log tool invocation at debug level)
     → ArgumentParser (validate args)
+      → PathSanitizer (validate scope paths)
     → Tool handler (SearchTool, GetMetadataTool, etc.)
       → QueryBuilder / SpotlightQuery (Search module)
       → PaginationConfig.apply()
       → ResultFormatter.format()
+    → Logger (log validation/execution errors)
     → CallTool.Result (JSON response)
 ```
 
@@ -35,13 +38,19 @@ MCP Client → JSON-RPC → Server (main.swift)
 
 **Location**: `Sources/SpotlightMCP/Tools/ToolRouter.swift`
 
-Routes `CallTool.Parameters` to the appropriate tool handler based on the `name` field. Returns structured error for unknown tool names.
+Routes `CallTool.Parameters` to the appropriate tool handler based on the `name` field. Returns structured error for unknown tool names. Logs tool invocations at debug level and errors at warning/error levels.
 
 ```swift
 struct ToolRouter: Sendable {
+    init(logger: Logger)
     func route(_ params: CallTool.Parameters) -> CallTool.Result
 }
 ```
+
+**Logging behavior**:
+- Tool invocations logged at `debug` level (complies with L08 — no result data)
+- Validation failures (missing/invalid arguments) logged at `warning` level
+- Execution failures logged at `error` level
 
 ### Tool Handlers
 
@@ -63,7 +72,7 @@ Retrieves Spotlight metadata for a specific file using `MDItemCreate`. Validates
 
 **Location**: `Sources/SpotlightMCP/Tools/SearchByKindTool.swift`
 
-Searches for files by content type using `QueryBuilder.kind()` and UTI mapping. Accepts `kind`, `scope`, and optional `limit`. Supported kinds: document, image, video, audio, pdf, code.
+Searches for files by content type using `QueryBuilder.kind()` and UTI mapping. Accepts `kind`, `scope`, and optional `limit`. Supported kinds: document, image, video, audio, pdf, code. Returns descriptive error with list of valid kinds when unknown kind provided.
 
 #### RecentFilesTool
 
@@ -75,16 +84,23 @@ Finds recently modified files using `QueryBuilder.modifiedSince()` with MDQuery 
 
 **Location**: `Sources/SpotlightMCP/Tools/ArgumentParser.swift`
 
-Extracts and validates tool arguments from `[String: Value]` dictionaries received from MCP.
+Extracts and validates tool arguments from `[String: Value]` dictionaries received from MCP. Enforces input validation rules per L07.
 
 ```swift
 struct ArgumentParser: Sendable {
     init(_ arguments: [String: Value]?)
     func requireString(_ key: String) throws(ToolError) -> String
+    func requireAbsolutePath(_ key: String) throws(ToolError) -> String
+    func requireValidatedScope(_ key: String) throws(ToolError) -> String
     func optionalString(_ key: String) -> String?
     func optionalInt(_ key: String) -> Int?
 }
 ```
+
+**Validation rules**:
+- `requireString`: Rejects empty strings
+- `requireAbsolutePath`: Rejects relative paths (must start with `/`)
+- `requireValidatedScope`: Validates absolute path, checks directory exists via PathSanitizer
 
 ### PaginationConfig
 
@@ -111,6 +127,24 @@ struct ResultFormatter {
     static func format(_ metadata: [String: MetadataValue]) -> Tool.Content
 }
 ```
+
+### PathSanitizer
+
+**Location**: `Sources/SpotlightMCP/Tools/PathSanitizer.swift`
+
+Sanitizes and validates file paths per L07 (Path Sanitization). Resolves symbolic links and enforces scope boundaries.
+
+```swift
+struct PathSanitizer: Sendable {
+    func sanitize(_ path: String, within scope: String) throws(ToolError) -> URL
+    func validateScope(_ scope: String) throws(ToolError)
+}
+```
+
+**Validation rules**:
+- Resolves symbolic links using `URL.resolvingSymlinksInPath()`
+- Validates resolved paths are within declared scope
+- Validates scope directories exist and are directories (not files)
 
 ### ToolError
 
@@ -168,7 +202,8 @@ Defines the four MCP tool schemas with names, descriptions, input parameter JSON
 |-----|-------------|
 | L04 (No Raw Query) | Tools accept only structured parameters |
 | L05 (Explicit Scope) | All search tools require `scope` parameter |
-| L07 (Path Sanitization) | GetMetadataTool validates absolute path and file existence |
+| L07 (Path Sanitization) | PathSanitizer resolves symlinks, validates scope boundaries; all tools use requireValidatedScope |
+| L08 (Minimal Logging) | ToolRouter logs only operational events, not search results or file metadata |
 | L09 (Structured JSON) | ResultFormatter produces JSON; never raw strings |
 | L10 (Pagination) | PaginationConfig enforces default 100, max 1000 |
 | L11 (ISO 8601) | ISO8601DateFormatter for dates; JSONEncoder with `.iso8601` |
@@ -184,14 +219,15 @@ Defines the four MCP tool schemas with names, descriptions, input parameter JSON
 
 | Test File | Coverage |
 |-----------|----------|
-| ArgumentParserTests.swift | requireString, optionalString, optionalInt, nil handling |
+| ArgumentParserTests.swift | requireString, requireAbsolutePath, requireValidatedScope, optionalString, optionalInt, nil handling |
+| PathSanitizerTests.swift | Path resolution, symlink validation, scope boundary enforcement, directory validation |
 | PaginationConfigTests.swift | default/max/min limits, apply truncation |
 | ResultFormatterTests.swift | JSON array/object formatting, empty results |
 | ToolErrorTests.swift | Error message formatting for all cases |
-| ToolRouterTests.swift | Routing to all tools, unknown tool error |
+| ToolRouterTests.swift | Routing to all tools, unknown tool error, logger injection |
 | SearchToolTests.swift | Valid execution, missing query/scope errors |
 | GetMetadataToolTests.swift | Valid file, missing/relative/nonexistent path errors |
-| SearchByKindToolTests.swift | Valid execution, missing kind/scope, unknown kind errors |
+| SearchByKindToolTests.swift | Valid execution, missing kind/scope, unknown kind errors with valid kinds list |
 | RecentFilesToolTests.swift | Valid execution, missing scope, invalid date errors |
 
 ## Related Documentation
