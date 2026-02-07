@@ -9,14 +9,22 @@ public enum QueryError: Error, Equatable, Sendable {
 
 /// Wraps MDQuery for type-safe Spotlight query execution.
 public struct SpotlightQuery {
-    public let predicate: NSPredicate
+    public let queryString: String
     public let scope: [URL]
 
     public init(
         predicate: NSPredicate,
         scope: [URL]
     ) {
-        self.predicate = predicate
+        self.queryString = predicate.predicateFormat
+        self.scope = scope
+    }
+
+    public init(
+        queryString: String,
+        scope: [URL]
+    ) {
+        self.queryString = queryString
         self.scope = scope
     }
 
@@ -51,8 +59,7 @@ public struct SpotlightQuery {
     }
 
     private func createQuery() -> MDQuery? {
-        let format = predicate.predicateFormat as CFString
-        return MDQueryCreate(kCFAllocatorDefault, format, nil, nil)
+        MDQueryCreate(kCFAllocatorDefault, queryString as CFString, nil, nil)
     }
 
     private func executeQuery(_ query: MDQuery) -> Bool {

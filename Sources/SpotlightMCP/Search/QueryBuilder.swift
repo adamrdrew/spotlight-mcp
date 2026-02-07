@@ -6,7 +6,7 @@ public enum BuilderError: Error, Equatable, Sendable {
 }
 
 /// Constructs NSPredicate from structured search parameters.
-public struct QueryBuilder {
+public struct QueryBuilder: Sendable {
     public init() {}
 
     public func naturalText(_ text: String) -> NSPredicate {
@@ -21,10 +21,14 @@ public struct QueryBuilder {
         KindMapping.predicate(forKind: kind)
     }
 
+    public func modifiedSince(_ isoDate: String) -> String {
+        "kMDItemContentModificationDate >= $time.iso(\(isoDate))"
+    }
+
     private func buildTextPredicate(_ text: String) -> NSPredicate {
         NSPredicate(
-            format: "kMDItemTextContent CONTAINS[cd] %@",
-            text
+            format: "kMDItemTextContent == %@",
+            "*\(text)*" as NSString
         )
     }
 

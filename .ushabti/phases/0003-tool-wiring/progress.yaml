@@ -1,0 +1,124 @@
+phase:
+  id: 0003
+  slug: tool-wiring
+  title: "Tool Wiring - Connect MCP Tools to Spotlight Engine"
+  status: complete
+
+steps:
+  - id: S001
+    title: "Define Tool Schemas"
+    implemented: true
+    reviewed: true
+    notes: "ToolSchemas.swift + ToolSchemas+Definitions.swift"
+    touched:
+      - Sources/SpotlightMCP/Tools/ToolSchemas.swift
+      - Sources/SpotlightMCP/Tools/ToolSchemas+Definitions.swift
+
+  - id: S002
+    title: "Implement Search Tool Handler"
+    implemented: true
+    reviewed: true
+    notes: "Uses QueryBuilder.naturalText with wildcard matching"
+    touched:
+      - Sources/SpotlightMCP/Tools/SearchTool.swift
+
+  - id: S003
+    title: "Implement Get Metadata Tool Handler"
+    implemented: true
+    reviewed: true
+    notes: "Creates MDItem directly via MDItemCreate"
+    touched:
+      - Sources/SpotlightMCP/Tools/GetMetadataTool.swift
+
+  - id: S004
+    title: "Implement Search By Kind Tool Handler"
+    implemented: true
+    reviewed: true
+    notes: "Uses QueryBuilder.kind for UTI mapping"
+    touched:
+      - Sources/SpotlightMCP/Tools/SearchByKindTool.swift
+
+  - id: S005
+    title: "Implement Recent Files Tool Handler"
+    implemented: true
+    reviewed: true
+    notes: "Uses raw query string with $time.iso() for MDQuery date syntax"
+    touched:
+      - Sources/SpotlightMCP/Tools/RecentFilesTool.swift
+
+  - id: S006
+    title: "Implement CallTool Routing Logic"
+    implemented: true
+    reviewed: true
+    notes: "ToolRouter dispatches by tool name with error handling"
+    touched:
+      - Sources/SpotlightMCP/Tools/ToolRouter.swift
+      - Sources/SpotlightMCP/main.swift
+
+  - id: S007
+    title: "Add Pagination and Result Limits"
+    implemented: true
+    reviewed: true
+    notes: "PaginationConfig: default 100, max 1000, clamped"
+    touched:
+      - Sources/SpotlightMCP/Tools/PaginationConfig.swift
+
+  - id: S008
+    title: "Add Error Handling and Validation"
+    implemented: true
+    reviewed: true
+    notes: "ToolError enum with typed throws, ArgumentParser validates inputs"
+    touched:
+      - Sources/SpotlightMCP/Tools/ToolError.swift
+      - Sources/SpotlightMCP/Tools/ArgumentParser.swift
+
+  - id: S009
+    title: "End-to-End Manual Test"
+    implemented: true
+    reviewed: true
+    notes: "All 4 tools tested via JSON-RPC. All error cases verified. Documented in manual-test.md."
+    touched:
+      - .ushabti/phases/0003-tool-wiring/manual-test.md
+
+  - id: S010
+    title: "Fix QueryBuilder.naturalText Test Failure"
+    implemented: true
+    reviewed: true
+    notes: "Updated test to match wildcard predicate format. Updated search-module.md docs. Added modifiedSince test."
+    touched:
+      - Tests/SpotlightMCPTests/Search/QueryBuilderTests.swift
+      - .ushabti/docs/search-module.md
+
+  - id: S011
+    title: "Add Automated Tool Handler Tests"
+    implemented: true
+    reviewed: true
+    notes: "79 tests across 13 suites. All pass. Covers all public methods in tool layer."
+    touched:
+      - Tests/SpotlightMCPTests/Tools/ArgumentParserTests.swift
+      - Tests/SpotlightMCPTests/Tools/PaginationConfigTests.swift
+      - Tests/SpotlightMCPTests/Tools/ResultFormatterTests.swift
+      - Tests/SpotlightMCPTests/Tools/ToolRouterTests.swift
+      - Tests/SpotlightMCPTests/Tools/SearchToolTests.swift
+      - Tests/SpotlightMCPTests/Tools/GetMetadataToolTests.swift
+      - Tests/SpotlightMCPTests/Tools/SearchByKindToolTests.swift
+      - Tests/SpotlightMCPTests/Tools/RecentFilesToolTests.swift
+      - Tests/SpotlightMCPTests/Tools/ToolErrorTests.swift
+
+  - id: S012
+    title: "Document Manual Test Execution"
+    implemented: true
+    reviewed: true
+    notes: "Created manual-test.md with procedure, requests, results, and verification table."
+    touched:
+      - .ushabti/phases/0003-tool-wiring/manual-test.md
+
+  - id: S013
+    title: "Reconcile Documentation with Tool Layer"
+    implemented: true
+    reviewed: true
+    notes: "Created tool-layer.md. Updated index.md and search-module.md."
+    touched:
+      - .ushabti/docs/tool-layer.md
+      - .ushabti/docs/index.md
+      - .ushabti/docs/search-module.md

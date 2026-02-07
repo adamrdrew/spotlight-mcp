@@ -8,15 +8,14 @@ let server = Server(
     )
 )
 
+let router = ToolRouter()
+
 await server.withMethodHandler(ListTools.self) { _ in
-    .init(tools: [])
+    .init(tools: ToolSchemas.all())
 }
 
-await server.withMethodHandler(CallTool.self) { _ in
-    .init(
-        content: [.text("No tools available")],
-        isError: true
-    )
+await server.withMethodHandler(CallTool.self) { params in
+    router.route(params)
 }
 
 let transport = StdioTransport()

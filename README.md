@@ -1,57 +1,46 @@
 # Spotlight MCP
 
-A Model Context Protocol (MCP) server that exposes macOS Spotlight functionality to Large Language Models.
+A [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) server that exposes macOS Spotlight search to Large Language Models. Built in Swift, runs as a single binary with no external dependencies beyond macOS.
 
-## Status
+## What It Does
 
-This is currently a proof-of-concept skeleton implementation. The server can complete the MCP protocol handshake and respond to basic protocol requests, but does not yet implement any Spotlight search functionality.
+Spotlight is the search engine built into every Mac — it indexes file contents, metadata, and file types across the filesystem. This server wraps that capability into four MCP tools that any LLM client can call:
+
+| Tool | Description |
+|------|-------------|
+| `search` | Full-text search across file contents within a directory |
+| `get_metadata` | Retrieve Spotlight metadata (type, size, dates, etc.) for a specific file |
+| `search_by_kind` | Find files by type: `document`, `image`, `video`, `audio`, `pdf`, `code` |
+| `recent_files` | Find files modified after a given date within a directory |
+
+All tools return structured JSON with absolute file paths, ISO 8601 dates, and full Spotlight metadata. Search results are paginated (default 100, max 1000).
 
 ## Requirements
 
-- **macOS**: 13.0 or later
-- **Swift**: 6.0 or later
-- **Swift Package Manager**: Included with Swift
+- **macOS** 13.0 or later
+- **Swift** 6.0 or later (ships with Xcode 16+)
 
-## Installation
+No other dependencies. Swift Package Manager handles the one external package (the [MCP Swift SDK](https://github.com/modelcontextprotocol/swift-sdk)).
 
-### Building from Source
+## Quick Start
 
-1. Clone this repository:
-   ```bash
-   git clone <repository-url>
-   cd spotlight-mcp
-   ```
-
-2. Build the project:
-   ```bash
-   swift build
-   ```
-
-3. The executable will be created at `.build/debug/spotlight-mcp`
-
-### Release Build
-
-For optimized performance, build in release mode:
 ```bash
-swift build -c release
-```
+# Build
+swift build
 
-The release binary will be at `.build/release/spotlight-mcp`
+# Run tests (79 tests)
+swift test
 
-## Usage
-
-Run the server:
-```bash
+# The binary is at:
 .build/debug/spotlight-mcp
 ```
 
-The server listens on standard input/output (stdio) for JSON-RPC messages conforming to the Model Context Protocol specification.
+The server communicates over stdin/stdout using JSON-RPC. You don't run it directly — an MCP client launches it as a subprocess.
 
-### MCP Client Integration
+## MCP Client Configuration
 
-To use this server with an MCP client, configure the client to launch the `spotlight-mcp` binary as a subprocess. The server communicates via stdio transport.
+Point your MCP client at the built binary. The exact format depends on your client:
 
-Example configuration (format varies by client):
 ```json
 {
   "mcpServers": {
@@ -62,80 +51,103 @@ Example configuration (format varies by client):
 }
 ```
 
-## Current Functionality
+For production use, build in release mode (`swift build -c release`) and use the binary at `.build/release/spotlight-mcp`.
 
-This skeleton implementation provides:
+## Tool Reference
 
-- **MCP Protocol Support**: Responds to `initialize` requests with server capabilities
-- **Stdio Transport**: JSON-RPC communication over standard input/output
-- **Empty Tools List**: The `tools/list` endpoint returns an empty array (no tools implemented yet)
-- **Stub Tool Call Handler**: The `tools/call` endpoint returns an error indicating no tools are available
+### search
 
-**No Spotlight functionality is currently implemented.** This is a scaffolding phase to establish the MCP server infrastructure.
+Search for files by text content within a scoped directory.
 
-## Available MCP Tools
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `query` | string | yes | Text to search for in file contents |
+| `scope` | string | yes | Absolute path to directory to search within |
+| `limit` | integer | no | Max results to return (default 100, max 1000) |
 
-Currently, no tools are implemented. The server returns an empty tools list.
+### get_metadata
 
-Future phases will implement Spotlight search tools.
+Get Spotlight metadata attributes for a specific file.
 
-## Configuration
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | yes | Absolute path to the file |
 
-No configuration is currently supported. Future phases will add configuration for search scopes, result limits, and other settings.
+### search_by_kind
+
+Search for files by content type within a scoped directory.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `kind` | string | yes | One of: `document`, `image`, `video`, `audio`, `pdf`, `code` |
+| `scope` | string | yes | Absolute path to directory to search within |
+| `limit` | integer | no | Max results to return (default 100, max 1000) |
+
+### recent_files
+
+Find recently modified files within a scoped directory.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `scope` | string | yes | Absolute path to directory to search within |
+| `since` | string | no | ISO 8601 date — only files modified after this (default: 7 days ago) |
+| `limit` | integer | no | Max results to return (default 100, max 1000) |
+
+## Security Model
+
+- **Scoped searches only** — every search tool requires an explicit directory scope. No system-wide searches are permitted.
+- **Read-only** — all tools are read-only (annotated with `readOnlyHint: true`). Nothing is created, modified, or deleted.
+- **Absolute paths** — all file paths in responses are absolute. No relative paths are accepted or returned.
+- **No elevated privileges** — the server runs with the same permissions as the user who launched it.
+- **TCC boundaries respected** — Spotlight honors macOS privacy controls. If the user hasn't granted access to a directory, results from that directory won't appear.
 
 ## Development
 
-### Running Tests
+### Building and Testing
 
-Tests will be added in future phases using the Swift Testing framework:
 ```bash
-swift test
+swift build                        # Debug build
+swift build -c release             # Release build
+swift test                         # Run all 79 tests
+swift test --filter SearchTool     # Run tests matching a name
 ```
 
 ### Project Structure
 
 ```
-spotlight-mcp/
-├── Sources/
-│   └── SpotlightMCP/
-│       └── main.swift          # Server entry point
-├── Tests/                       # Test suite (future)
-├── Package.swift                # Swift package manifest
-└── README.md                    # This file
+Sources/SpotlightMCP/
+├── main.swift                     # Server entry point, wires everything together
+├── Search/                        # Spotlight API abstraction layer
+│   ├── SpotlightQuery.swift       # MDQuery execution wrapper
+│   ├── QueryBuilder.swift         # Predicate construction from structured params
+│   ├── MetadataItem.swift         # MDItem attribute extraction
+│   ├── KindMapping.swift          # Friendly names → UTI type predicates
+│   └── Types.swift                # SearchResult, MetadataValue types
+└── Tools/                         # MCP tool handlers
+    ├── ToolRouter.swift           # Dispatches CallTool to correct handler
+    ├── SearchTool.swift           # search tool implementation
+    ├── GetMetadataTool.swift      # get_metadata tool implementation
+    ├── SearchByKindTool.swift     # search_by_kind tool implementation
+    ├── RecentFilesTool.swift      # recent_files tool implementation
+    ├── ToolSchemas.swift          # Tool definitions for ListTools
+    ├── ArgumentParser.swift       # Extracts/validates MCP arguments
+    ├── PaginationConfig.swift     # Result limit enforcement
+    ├── ResultFormatter.swift      # JSON serialization of results
+    └── ToolError.swift            # Typed error enum
+
+Tests/SpotlightMCPTests/
+├── Search/                        # Unit + integration tests for search layer
+└── Tools/                         # Unit tests for tool handlers
 ```
 
-### Swift 6 Language Mode
+### Code Style
 
-This project uses Swift 6 language mode for enhanced memory safety, strict concurrency checking, and modern error handling with typed throws.
-
-## License
-
-[License information to be added]
-
-## Contributing
-
-[Contribution guidelines to be added]
-
-## Roadmap
-
-- [x] Phase 1: Skeleton - MCP server with stdio transport
-- [ ] Future: Spotlight search tool implementation
-- [ ] Future: Path sanitization and security boundaries
-- [ ] Future: Result pagination and limits
-- [ ] Future: Automated test suite
+This project enforces [Sandi Metz's rules](https://thoughtbot.com/blog/sandi-metz-rules-for-developers): types are capped at 100 lines, methods at 5 lines, and parameter lists at 4. It uses Swift 6 strict concurrency, typed throws, and value semantics throughout. See `.ushabti/style.md` for the full style guide.
 
 ## Technical Details
 
-### MCP SDK
-
-This server uses the official Swift MCP SDK from the Model Context Protocol project:
-- Repository: https://github.com/modelcontextprotocol/swift-sdk
-- Version: 0.1.0 or later
-
-### Protocol Version
-
-The server implements MCP protocol version `2025-03-26`.
-
-## Support
-
-[Support information to be added]
+- **MCP SDK**: [modelcontextprotocol/swift-sdk](https://github.com/modelcontextprotocol/swift-sdk) v0.1.0+
+- **Transport**: Stdio (JSON-RPC over stdin/stdout)
+- **Swift language mode**: Swift 6 (strict concurrency)
+- **Spotlight APIs**: CoreServices MDQuery/MDItem (public APIs only)
+- **Output**: Single statically-linked binary, no dylibs or runtime dependencies

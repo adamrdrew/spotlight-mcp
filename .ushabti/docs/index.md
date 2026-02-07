@@ -13,3 +13,4 @@ An MCP server written in Swift to expose macOS Spotlight functionality to LLMs.
 ## Table of Contents
 
 - [Search Module](search-module.md) - Spotlight query engine architecture, types, and usage
+- [Tool Layer](tool-layer.md) - MCP tool handlers, routing, pagination, and error handling

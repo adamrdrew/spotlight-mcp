@@ -99,16 +99,17 @@ let arrayValue = MetadataValue.array([.string("a"), .int(1)])
 **Definition**:
 ```swift
 public struct SpotlightQuery {
-    public let predicate: NSPredicate
+    public let queryString: String
     public let scope: [URL]
 
     public init(predicate: NSPredicate, scope: [URL])
+    public init(queryString: String, scope: [URL])
     public func execute() throws(QueryError) -> [SearchResult]
 }
 ```
 
 **Properties**:
-- `predicate`: NSPredicate defining search criteria
+- `queryString`: MDQuery predicate format string defining search criteria
 - `scope`: Array of directory URLs to search within
 
 **Methods**:
@@ -120,9 +121,19 @@ public struct SpotlightQuery {
 
 **Usage**:
 ```swift
-let predicate = NSPredicate(format: "kMDItemTextContent CONTAINS[cd] %@", "search term")
+let predicate = QueryBuilder().naturalText("search term")
 let query = SpotlightQuery(
     predicate: predicate,
+    scope: [URL(fileURLWithPath: "/Users/example/Documents")]
+)
+let results = try query.execute()
+```
+
+SpotlightQuery also accepts raw MDQuery strings for predicates that use MDQuery-specific syntax (e.g., `$time.iso()`):
+```swift
+let queryString = QueryBuilder().modifiedSince("2026-01-01T00:00:00Z")
+let query = SpotlightQuery(
+    queryString: queryString,
     scope: [URL(fileURLWithPath: "/Users/example/Documents")]
 )
 let results = try query.execute()
@@ -173,17 +184,19 @@ let allMetadata = item.getAllAttributes()
 
 **Definition**:
 ```swift
-public struct QueryBuilder {
-    public static func naturalText(_ text: String) -> NSPredicate
-    public static func rawPredicate(_ predicateString: String) throws(BuilderError) -> NSPredicate
-    public static func kind(_ kind: String) -> NSPredicate?
+public struct QueryBuilder: Sendable {
+    public func naturalText(_ text: String) -> NSPredicate
+    public func rawPredicate(_ predicateString: String) throws(BuilderError) -> NSPredicate
+    public func kind(_ kind: String) -> NSPredicate?
+    public func modifiedSince(_ isoDate: String) -> String
 }
 ```
 
 **Methods**:
-- `naturalText(_ text:)`: Creates predicate for natural language text search (kMDItemTextContent contains text)
+- `naturalText(_ text:)`: Creates wildcard predicate for text search (`kMDItemTextContent == "*text*"`)
 - `rawPredicate(_ predicateString:)`: Parses and validates raw predicate strings
 - `kind(_ kind:)`: Delegates to KindMapping to create UTI-based predicate
+- `modifiedSince(_ isoDate:)`: Returns raw MDQuery string for date-filtered search using `$time.iso()` syntax
 
 **Errors**: Throws `BuilderError` for invalid predicate strings.
 
