@@ -1,0 +1,97 @@
+phase:
+  id: "0004"
+  slug: polish-and-harden
+  title: "Polish and Harden"
+  status: planned
+
+steps:
+  - id: S001
+    title: "Add Server Instructions"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
+
+  - id: S002
+    title: "Add swift-log Dependency"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
+
+  - id: S003
+    title: "Implement Input Validation"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
+
+  - id: S004
+    title: "Implement Path Sanitization"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
+
+  - id: S005
+    title: "Handle Spotlight Edge Cases"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
+
+  - id: S006
+    title: "Add Structured Logging"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
+
+  - id: S007
+    title: "Test Input Validation"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
+
+  - id: S008
+    title: "Test Path Sanitization"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
+
+  - id: S009
+    title: "Test Edge Case Handling"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
+
+  - id: S010
+    title: "Test with Claude Desktop"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
+
+  - id: S011
+    title: "Write README.md"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
+
+  - id: S012
+    title: "Reconcile Documentation"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
+
+  - id: S013
+    title: "Final Testing"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
