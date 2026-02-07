@@ -1,0 +1,48 @@
+phase:
+  id: "0001"
+  slug: skeleton
+  title: "Skeleton - MCP Server with Stdio Transport"
+  status: planned
+
+steps:
+  - id: S001
+    title: "Create Package.swift with MCP SDK Dependency"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
+
+  - id: S002
+    title: "Create Main Entry Point with Server Initialization"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
+
+  - id: S003
+    title: "Register ListTools Handler Returning Empty Array"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
+
+  - id: S004
+    title: "Register CallTool Handler with Stub Implementation"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
+
+  - id: S005
+    title: "Build and Verify Compilation"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
+
+  - id: S006
+    title: "Manual Test of MCP Protocol Handshake"
+    implemented: false
+    reviewed: false
+    notes: ""
+    touched: []
