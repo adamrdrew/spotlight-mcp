@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-02-07
+
+### Fixed
+
+- Release workflow: Add contents write permission for GitHub Release creation
+
 ## [0.1.1] - 2026-02-07
 
 ### Fixed
@@ -68,6 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Case-sensitive search behavior (Phase 5) - Text search now uses case-insensitive matching
 - MDQuery syntax compatibility (Phase 6) - Date predicates use raw MDQuery strings to avoid NSPredicate serialization issues
 
-[unreleased]: https://github.com/adamrdrew/spotlight-mcp/compare/v0.1.1...HEAD
+[unreleased]: https://github.com/adamrdrew/spotlight-mcp/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/adamrdrew/spotlight-mcp/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/adamrdrew/spotlight-mcp/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/adamrdrew/spotlight-mcp/releases/tag/v0.1.0
