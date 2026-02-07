@@ -7,10 +7,10 @@ struct QueryBuilderTests {
 
     @Test("naturalText produces text content predicate")
     func naturalTextProducesTextContentPredicate() {
-        let predicate = builder.naturalText("test")
-        let expected = "kMDItemTextContent ==[cd] \"*test*\""
+        let queryString = builder.naturalText("test")
+        let expected = "kMDItemTextContent == \"*test*\"cd"
 
-        #expect(predicate.predicateFormat == expected)
+        #expect(queryString == expected)
     }
 
     @Test("naturalText produces case-insensitive predicate")
@@ -18,10 +18,10 @@ struct QueryBuilderTests {
         let lowercase = builder.naturalText("hello world")
         let uppercase = builder.naturalText("HELLO WORLD")
 
-        #expect(lowercase.predicateFormat.contains("==[cd]"))
-        #expect(uppercase.predicateFormat.contains("==[cd]"))
-        #expect(lowercase.predicateFormat == "kMDItemTextContent ==[cd] \"*hello world*\"")
-        #expect(uppercase.predicateFormat == "kMDItemTextContent ==[cd] \"*HELLO WORLD*\"")
+        #expect(lowercase.contains("cd"))
+        #expect(uppercase.contains("cd"))
+        #expect(lowercase == "kMDItemTextContent == \"*hello world*\"cd")
+        #expect(uppercase == "kMDItemTextContent == \"*HELLO WORLD*\"cd")
     }
 
     @Test("rawPredicate parses valid predicate")
@@ -59,5 +59,13 @@ struct QueryBuilderTests {
         let expected = "kMDItemContentModificationDate >= $time.iso(2026-01-01T00:00:00Z)"
 
         #expect(result == expected)
+    }
+
+    @Test("multi-word text search produces correct Spotlight query format")
+    func multiWordTextSearchQueryFormat() {
+        let queryString = builder.naturalText("architecture decisions")
+        let expected = "kMDItemTextContent == \"*architecture decisions*\"cd"
+
+        #expect(queryString == expected)
     }
 }

@@ -121,9 +121,9 @@ public struct SpotlightQuery {
 
 **Usage**:
 ```swift
-let predicate = QueryBuilder().naturalText("search term")
+let queryString = QueryBuilder().naturalText("search term")
 let query = SpotlightQuery(
-    predicate: predicate,
+    queryString: queryString,
     scope: [URL(fileURLWithPath: "/Users/example/Documents")]
 )
 let results = try query.execute()
@@ -193,7 +193,7 @@ public struct QueryBuilder: Sendable {
 ```
 
 **Methods**:
-- `naturalText(_ text:)`: Creates case-insensitive wildcard predicate for text search (`kMDItemTextContent ==[cd] "*text*"`)
+- `naturalText(_ text:)`: Creates case-insensitive wildcard query string for text content search (`kMDItemTextContent == "*text*"cd`). Returns Spotlight-native query string (not NSPredicate) because MDQuery uses different syntax than NSPredicate.
 - `rawPredicate(_ predicateString:)`: Parses and validates raw predicate strings
 - `kind(_ kind:)`: Delegates to KindMapping to create UTI-based predicate
 - `modifiedSince(_ isoDate:)`: Returns raw MDQuery string for date-filtered search using `$time.iso()` syntax
@@ -202,9 +202,9 @@ public struct QueryBuilder: Sendable {
 
 **Usage**:
 ```swift
-let textPredicate = QueryBuilder.naturalText("important document")
-let rawPredicate = try QueryBuilder.rawPredicate("kMDItemFSSize > 1000000")
-let imagePredicate = QueryBuilder.kind("image")
+let textQuery = QueryBuilder().naturalText("important document")
+let rawPredicate = try QueryBuilder().rawPredicate("kMDItemFSSize > 1000000")
+let imagePredicate = QueryBuilder().kind("image")
 ```
 
 ### KindMapping
@@ -299,6 +299,14 @@ public enum BuilderError: Error, Equatable, Sendable {
 
 ## Design Decisions
 
+### MDQuery vs NSPredicate Syntax
+
+**Decision**: Use Spotlight-native query strings (not NSPredicate) for text searches.
+
+**Rationale**: MDQuery and NSPredicate have different predicate dialects. NSPredicate modifiers like `[cd]` (case/diacritic insensitive) are not understood by MDQuery. Spotlight's native syntax uses suffixes like `cd` after quoted strings (e.g., `"*text*"cd`).
+
+**Implementation**: `QueryBuilder.naturalText()` returns a `String` containing the Spotlight query format `kMDItemTextContent == "*text*"cd`, which is passed directly to `MDQueryCreate` via `SpotlightQuery(queryString:scope:)`. This performs case-insensitive text content search across file contents.
+
 ### Synchronous Execution
 
 **Decision**: Use synchronous MDQuery execution (`kMDQuerySynchronous`).
@@ -344,9 +352,9 @@ public enum BuilderError: Error, Equatable, Sendable {
 ### Basic Text Search
 
 ```swift
-let predicate = QueryBuilder.naturalText("meeting notes")
+let queryString = QueryBuilder().naturalText("meeting notes")
 let query = SpotlightQuery(
-    predicate: predicate,
+    queryString: queryString,
     scope: [URL(fileURLWithPath: "/Users/example/Documents")]
 )
 let results = try query.execute()

@@ -9,7 +9,7 @@ public enum BuilderError: Error, Equatable, Sendable {
 public struct QueryBuilder: Sendable {
     public init() {}
 
-    public func naturalText(_ text: String) -> NSPredicate {
+    public func naturalText(_ text: String) -> String {
         buildTextPredicate(text)
     }
 
@@ -25,11 +25,8 @@ public struct QueryBuilder: Sendable {
         "kMDItemContentModificationDate >= $time.iso(\(isoDate))"
     }
 
-    private func buildTextPredicate(_ text: String) -> NSPredicate {
-        NSPredicate(
-            format: "kMDItemTextContent ==[cd] %@",
-            "*\(text)*" as NSString
-        )
+    private func buildTextPredicate(_ text: String) -> String {
+        "kMDItemTextContent == \"*\(text)*\"cd"
     }
 
     private func parseRawPredicate(_ predicateString: String) throws(BuilderError) -> NSPredicate {

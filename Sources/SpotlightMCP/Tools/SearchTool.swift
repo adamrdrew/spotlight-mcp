@@ -24,9 +24,9 @@ extension SearchTool {
         _ text: String,
         _ scopePath: String
     ) throws(ToolError) -> [SearchResult] {
-        let predicate = builder.naturalText(text)
+        let queryString = builder.naturalText(text)
         let scope = [URL(fileURLWithPath: scopePath)]
-        let query = SpotlightQuery(predicate: predicate, scope: scope)
+        let query = SpotlightQuery(queryString: queryString, scope: scope)
         return try runQuery(query)
     }
 

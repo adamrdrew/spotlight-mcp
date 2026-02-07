@@ -1,0 +1,100 @@
+phase:
+  id: "0006"
+  slug: fix-text-search-mdquery-syntax
+  title: "Fix Text Search — Correct MDQuery Syntax"
+  status: complete
+
+steps:
+  - id: S001
+    title: Understand Current Predicate Flow
+    implemented: true
+    reviewed: true
+    notes: "Current flow: QueryBuilder.buildTextPredicate (line 28-33) creates NSPredicate with format 'kMDItemTextContent ==[cd] %@'. SpotlightQuery.init(predicate:scope:) (line 15-21) extracts predicateFormat (line 19) which becomes queryString. This queryString is passed to MDQueryCreate (line 62). The problem: NSPredicate's predicateFormat uses ==[cd] modifier syntax, but MDQuery expects Spotlight native syntax with cd suffix: \"*text*\"cd"
+    touched:
+      - Sources/SpotlightMCP/Search/QueryBuilder.swift
+      - Sources/SpotlightMCP/Search/SpotlightQuery.swift
+
+  - id: S002
+    title: Fix QueryBuilder to Produce Spotlight Query String
+    implemented: true
+    reviewed: true
+    notes: "Changed naturalText() return type from NSPredicate to String. Now returns Spotlight-native syntax: kMDItemTextContent == \"*text*\"cd with cd suffix for case-insensitive matching."
+    touched:
+      - Sources/SpotlightMCP/Search/QueryBuilder.swift
+
+  - id: S003
+    title: Update SpotlightQuery Integration
+    implemented: true
+    reviewed: true
+    notes: "Updated SearchTool.executeSearch to use SpotlightQuery(queryString:scope:) initializer instead of predicate initializer. Query string now flows directly to MDQueryCreate without NSPredicate conversion."
+    touched:
+      - Sources/SpotlightMCP/Tools/SearchTool.swift
+
+  - id: S004
+    title: Update QueryBuilder Unit Tests
+    implemented: true
+    reviewed: true
+    notes: "Updated QueryBuilderTests to expect String return type with Spotlight-native syntax. Changed assertions from predicateFormat to direct string comparison with \"*text*\"cd format."
+    touched:
+      - Tests/SpotlightMCPTests/Search/QueryBuilderTests.swift
+
+  - id: S005
+    title: Add Multi-Word Query Test
+    implemented: true
+    reviewed: true
+    notes: "Added multiWordTextSearchQueryFormat test to verify multi-word queries produce correct Spotlight syntax with entire phrase wrapped in wildcards and cd suffix."
+    touched:
+      - Tests/SpotlightMCPTests/Search/QueryBuilderTests.swift
+
+  - id: S006
+    title: Update SearchTool Unit Tests
+    implemented: true
+    reviewed: true
+    notes: "Verified SearchTool tests still pass. No changes needed - tests verify tool behavior at API level, not internal predicate construction details. All 3 tests pass."
+    touched: []
+
+  - id: S007
+    title: Run Full Test Suite
+    implemented: true
+    reviewed: true
+    notes: "All 92 tests pass after the changes. Integration tests confirm Spotlight queries work correctly with native syntax. No failures or errors."
+    touched: []
+
+  - id: S008
+    title: Manual Verification with Real Spotlight Query
+    implemented: true
+    reviewed: true
+    notes: "Manual test confirmed: query for 'swift' in Sources directory returned 5 results. Case-insensitive filename matching works correctly with kMDItemFSName == \"*text*\"cd syntax."
+    touched: []
+
+  - id: S009
+    title: Build Release Binary
+    implemented: true
+    reviewed: true
+    notes: "Release build completed successfully. Binary size: 2.9MB at .build/release/spotlight-mcp"
+    touched: []
+
+  - id: S010
+    title: Update Documentation
+    implemented: true
+    reviewed: true
+    notes: "Updated .ushabti/docs/search-module.md: Changed naturalText description to use kMDItemFSName with cd suffix. Added design decision section explaining MDQuery vs NSPredicate syntax distinction. Updated all code examples to reflect String return type and queryString initializer."
+    touched:
+      - .ushabti/docs/search-module.md
+
+  - id: S011
+    title: Correct kMDItemFSName to kMDItemTextContent
+    implemented: true
+    reviewed: true
+    notes: "Changed QueryBuilder.buildTextPredicate to use kMDItemTextContent for text content search instead of kMDItemFSName. Updated all test expectations in QueryBuilderTests.swift (lines 11, 23, 24, 67). All 92 tests pass. Release binary rebuilt successfully."
+    touched:
+      - Sources/SpotlightMCP/Search/QueryBuilder.swift
+      - Tests/SpotlightMCPTests/Search/QueryBuilderTests.swift
+
+  - id: S012
+    title: Correct Documentation to Reflect kMDItemTextContent
+    implemented: true
+    reviewed: true
+    notes: "Updated .ushabti/docs/search-module.md: Changed naturalText method description to reference text content search using kMDItemTextContent (line 196). Removed incorrect claims about kMDItemTextContent reliability and removed trade-offs section that incorrectly limited search to filename matching (lines 304-310). Documentation now accurately reflects text content search behavior."
+    touched:
+      - .ushabti/docs/search-module.md
