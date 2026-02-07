@@ -17,14 +17,22 @@ jobs:
         id: tag
         run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
-      - name: Build universal binary
-        run: swift build -c release --arch arm64 --arch x86_64
+      - name: Build arm64
+        run: swift build -c release --arch arm64
 
-      - name: Verify binary exists
-        run: ls -lh .build/apple/Products/Release/spotlight-mcp
+      - name: Build x86_64
+        run: swift build -c release --arch x86_64
+
+      - name: Create universal binary
+        run: |
+          lipo -create \
+            .build/arm64-apple-macosx/release/spotlight-mcp \
+            .build/x86_64-apple-macosx/release/spotlight-mcp \
+            -output spotlight-mcp
+          lipo -info spotlight-mcp
 
       - name: Create tarball
-        run: tar -czf spotlight-mcp-${{ steps.tag.outputs.TAG }}-universal.tar.gz -C .build/apple/Products/Release spotlight-mcp
+        run: tar -czf spotlight-mcp-${{ steps.tag.outputs.TAG }}-universal.tar.gz spotlight-mcp
 
       - name: Compute SHA256
         id: sha
