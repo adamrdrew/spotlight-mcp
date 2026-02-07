@@ -8,9 +8,20 @@ struct QueryBuilderTests {
     @Test("naturalText produces text content predicate")
     func naturalTextProducesTextContentPredicate() {
         let predicate = builder.naturalText("test")
-        let expected = "kMDItemTextContent == \"*test*\""
+        let expected = "kMDItemTextContent ==[cd] \"*test*\""
 
         #expect(predicate.predicateFormat == expected)
+    }
+
+    @Test("naturalText produces case-insensitive predicate")
+    func caseInsensitiveTextMatching() {
+        let lowercase = builder.naturalText("hello world")
+        let uppercase = builder.naturalText("HELLO WORLD")
+
+        #expect(lowercase.predicateFormat.contains("==[cd]"))
+        #expect(uppercase.predicateFormat.contains("==[cd]"))
+        #expect(lowercase.predicateFormat == "kMDItemTextContent ==[cd] \"*hello world*\"")
+        #expect(uppercase.predicateFormat == "kMDItemTextContent ==[cd] \"*HELLO WORLD*\"")
     }
 
     @Test("rawPredicate parses valid predicate")

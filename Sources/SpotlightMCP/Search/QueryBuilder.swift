@@ -27,7 +27,7 @@ public struct QueryBuilder: Sendable {
 
     private func buildTextPredicate(_ text: String) -> NSPredicate {
         NSPredicate(
-            format: "kMDItemTextContent == %@",
+            format: "kMDItemTextContent ==[cd] %@",
             "*\(text)*" as NSString
         )
     }

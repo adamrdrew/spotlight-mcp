@@ -1,0 +1,52 @@
+phase:
+  id: "0005"
+  slug: fix-case-insensitive-search
+  title: Fix Case-Insensitive Text Search
+  status: complete
+
+steps:
+  - id: S001
+    title: Fix QueryBuilder.buildTextPredicate to use case-insensitive matching
+    implemented: true
+    reviewed: true
+    notes: "Changed predicate format from '==' to '==[cd]' for case and diacritical insensitive matching"
+    touched:
+      - Sources/SpotlightMCP/Search/QueryBuilder.swift
+
+  - id: S002
+    title: Update existing test to expect case-insensitive format
+    implemented: true
+    reviewed: true
+    notes: "Updated naturalTextProducesTextContentPredicate to expect '==[cd]' in predicate format"
+    touched:
+      - Tests/SpotlightMCPTests/Search/QueryBuilderTests.swift
+
+  - id: S003
+    title: Add new test verifying case-insensitive behavior
+    implemented: true
+    reviewed: true
+    notes: "Added caseInsensitiveTextMatching test that verifies predicates for 'hello world' and 'HELLO WORLD' both contain ==[cd] modifier"
+    touched:
+      - Tests/SpotlightMCPTests/Search/QueryBuilderTests.swift
+
+  - id: S004
+    title: Verify all existing tests pass
+    implemented: true
+    reviewed: true
+    notes: "All 91 tests passed (including newly added test). No compiler warnings or errors."
+    touched: []
+
+  - id: S005
+    title: Build release binary
+    implemented: true
+    reviewed: true
+    notes: "Release binary built successfully at .build/release/spotlight-mcp (2.9M)"
+    touched: []
+
+  - id: F001
+    title: Update search-module.md to reflect case-insensitive matching
+    implemented: true
+    reviewed: true
+    notes: "Updated line 196 to describe case-insensitive behavior with ==[cd] modifier in both description and example"
+    touched:
+      - .ushabti/docs/search-module.md

@@ -193,7 +193,7 @@ public struct QueryBuilder: Sendable {
 ```
 
 **Methods**:
-- `naturalText(_ text:)`: Creates wildcard predicate for text search (`kMDItemTextContent == "*text*"`)
+- `naturalText(_ text:)`: Creates case-insensitive wildcard predicate for text search (`kMDItemTextContent ==[cd] "*text*"`)
 - `rawPredicate(_ predicateString:)`: Parses and validates raw predicate strings
 - `kind(_ kind:)`: Delegates to KindMapping to create UTI-based predicate
 - `modifiedSince(_ isoDate:)`: Returns raw MDQuery string for date-filtered search using `$time.iso()` syntax
