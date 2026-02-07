@@ -1,0 +1,99 @@
+phase_id: "0007"
+status: building
+notes: |
+  Overseer review identified critical defects:
+  1. CHANGELOG.md missing (L27 violation) - workflow references it
+  2. Step 8 incomplete - end-to-end testing not performed
+  3. Formula template not committed to tap repo
+  4. Workflow inconsistency with phase scope on CHANGELOG
+  Follow-up steps 11-14 added to address these issues.
+steps:
+  - id: 1
+    status: IMPLEMENTED
+    implemented: true
+    notes: Created .github/workflows/release.yml with trigger on v* tags and macOS runner
+    files:
+      - /Users/adam/Development/spotlight-mcp/.github/workflows/release.yml
+  - id: 2
+    status: IMPLEMENTED
+    implemented: true
+    notes: Added universal binary build step with arm64+x86_64 architecture flags and tag extraction
+    files:
+      - /Users/adam/Development/spotlight-mcp/.github/workflows/release.yml
+  - id: 3
+    status: IMPLEMENTED
+    implemented: true
+    notes: Added tarball creation with tag-based naming and SHA256 computation step
+    files:
+      - /Users/adam/Development/spotlight-mcp/.github/workflows/release.yml
+  - id: 4
+    status: IMPLEMENTED
+    implemented: true
+    notes: Added GitHub release creation step using gh CLI with tarball attachment
+    files:
+      - /Users/adam/Development/spotlight-mcp/.github/workflows/release.yml
+  - id: 5
+    status: IMPLEMENTED
+    implemented: true
+    notes: Added steps to clone tap repo using PAT and update formula URL/SHA256 using sed
+    files:
+      - /Users/adam/Development/spotlight-mcp/.github/workflows/release.yml
+  - id: 6
+    status: IMPLEMENTED
+    implemented: true
+    notes: Added git commit and push steps using GitHub Actions bot identity and PAT authentication
+    files:
+      - /Users/adam/Development/spotlight-mcp/.github/workflows/release.yml
+  - id: 7
+    status: IMPLEMENTED
+    implemented: true
+    notes: Created formula template at FORMULA_TEMPLATE.rb. Must be manually committed to tap repo at Formula/spotlight-mcp.rb before first release
+    files:
+      - /Users/adam/Development/spotlight-mcp/.ushabti/phases/0007-homebrew-release-automation/FORMULA_TEMPLATE.rb
+  - id: 8
+    status: NOT_STARTED
+    implemented: false
+    notes: |
+      Manual testing required - cannot be automated. Checklist:
+      1. Manually commit FORMULA_TEMPLATE.rb to tap repo at Formula/spotlight-mcp.rb
+      2. Push test tag: git tag v0.0.1-test && git push origin v0.0.1-test
+      3. Verify workflow runs in GitHub Actions
+      4. Verify GitHub Release created with tarball
+      5. Verify formula URL/SHA256 updated in tap
+      6. Test: brew tap adamrdrew/spotlight-mcp && brew install spotlight-mcp
+      7. Verify binary runs: spotlight-mcp (awaits JSON-RPC)
+  - id: 9
+    status: IMPLEMENTED
+    implemented: true
+    notes: Updated README.md with Homebrew installation section and updated MCP client configuration examples
+    files:
+      - /Users/adam/Development/spotlight-mcp/README.md
+  - id: 10
+    status: IMPLEMENTED
+    implemented: true
+    notes: Created release-automation.md and updated index.md to document new GitHub Actions workflow system
+    files:
+      - /Users/adam/Development/spotlight-mcp/.ushabti/docs/release-automation.md
+      - /Users/adam/Development/spotlight-mcp/.ushabti/docs/index.md
+  - id: 11
+    status: IMPLEMENTED
+    implemented: true
+    reviewed: false
+    notes: Created CHANGELOG.md following Keep a Changelog format with initial v0.1.0 entry documenting all features from phases 1-7
+    files:
+      - /Users/adam/Development/spotlight-mcp/CHANGELOG.md
+  - id: 12
+    status: NOT_STARTED
+    implemented: false
+    reviewed: false
+    notes: Workflow references CHANGELOG.md but phase initially excluded it - resolved by creating CHANGELOG.md in step 11
+  - id: 13
+    status: NOT_STARTED
+    implemented: false
+    reviewed: false
+    notes: Formula template must be manually committed to tap repo before workflow can update it
+  - id: 14
+    status: NOT_STARTED
+    implemented: false
+    reviewed: false
+    notes: Complete step 8 requirements - full end-to-end test with real tag push and Homebrew installation verification

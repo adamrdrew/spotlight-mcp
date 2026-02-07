@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract tag name
+        id: tag
+        run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Build universal binary
+        run: swift build -c release --arch arm64 --arch x86_64
+
+      - name: Verify binary exists
+        run: ls -lh .build/apple/Products/Release/spotlight-mcp
+
+      - name: Create tarball
+        run: tar -czf spotlight-mcp-${{ steps.tag.outputs.TAG }}-universal.tar.gz -C .build/apple/Products/Release spotlight-mcp
+
+      - name: Compute SHA256
+        id: sha
+        run: echo "SHA256=$(shasum -a 256 spotlight-mcp-${{ steps.tag.outputs.TAG }}-universal.tar.gz | awk '{print $1}')" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create ${{ steps.tag.outputs.TAG }} \
+            --title "Release ${{ steps.tag.outputs.TAG }}" \
+            --notes "See [CHANGELOG.md](https://github.com/adamrdrew/spotlight-mcp/blob/master/CHANGELOG.md) for details." \
+            spotlight-mcp-${{ steps.tag.outputs.TAG }}-universal.tar.gz
+
+      - name: Clone tap repository
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_SPOTLIGHT_MCP_PAT }}
+        run: git clone https://x-access-token:${TAP_TOKEN}@github.com/adamrdrew/homebrew-spotlight-mcp.git tap-repo
+
+      - name: Update formula URL
+        run: |
+          cd tap-repo
+          sed -i '' "s|url \".*\"|url \"https://github.com/adamrdrew/spotlight-mcp/releases/download/${{ steps.tag.outputs.TAG }}/spotlight-mcp-${{ steps.tag.outputs.TAG }}-universal.tar.gz\"|" Formula/spotlight-mcp.rb
+
+      - name: Update formula SHA256
+        run: |
+          cd tap-repo
+          sed -i '' "s|sha256 \".*\"|sha256 \"${{ steps.sha.outputs.SHA256 }}\"|" Formula/spotlight-mcp.rb
+
+      - name: Commit and push formula update
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_SPOTLIGHT_MCP_PAT }}
+        run: |
+          cd tap-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/spotlight-mcp.rb
+          git commit -m "Update spotlight-mcp to ${{ steps.tag.outputs.TAG }}"
+          git push https://x-access-token:${TAP_TOKEN}@github.com/adamrdrew/homebrew-spotlight-mcp.git

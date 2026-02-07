@@ -18,13 +18,32 @@ All tools return structured JSON with absolute file paths, ISO 8601 dates, and f
 ## Requirements
 
 - **macOS** 13.0 or later
-- **Swift** 6.0 or later (ships with Xcode 16+)
+- **Swift** 6.0 or later (ships with Xcode 16+) — only required if building from source
 
 No other dependencies. Swift Package Manager handles the one external package (the [MCP Swift SDK](https://github.com/modelcontextprotocol/swift-sdk)).
 
-## Quick Start
+## Installation
+
+### Homebrew (Recommended)
+
+The easiest way to install is via Homebrew:
 
 ```bash
+brew tap adamrdrew/spotlight-mcp
+brew install spotlight-mcp
+```
+
+The binary will be installed to `/opt/homebrew/bin/spotlight-mcp` (Apple Silicon) or `/usr/local/bin/spotlight-mcp` (Intel).
+
+**Note:** Since the binary is not code-signed, macOS may prompt you to allow it on first run. This is normal for Homebrew-distributed binaries.
+
+### Build from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/adamrdrew/spotlight-mcp.git
+cd spotlight-mcp
+
 # Build
 swift build
 
@@ -39,7 +58,23 @@ The server communicates over stdin/stdout using JSON-RPC. You don't run it direc
 
 ## MCP Client Configuration
 
-Point your MCP client at the built binary. The exact format depends on your client:
+Point your MCP client at the binary. The exact format depends on your client:
+
+**If installed via Homebrew:**
+
+```json
+{
+  "mcpServers": {
+    "spotlight": {
+      "command": "/opt/homebrew/bin/spotlight-mcp"
+    }
+  }
+}
+```
+
+(Use `/usr/local/bin/spotlight-mcp` on Intel Macs)
+
+**If built from source:**
 
 ```json
 {
@@ -51,7 +86,7 @@ Point your MCP client at the built binary. The exact format depends on your clie
 }
 ```
 
-For production use, build in release mode (`swift build -c release`) and use the binary at `.build/release/spotlight-mcp`.
+For production use with source builds, use release mode (`swift build -c release`) and point to `.build/release/spotlight-mcp`.
 
 ## Tool Reference
 

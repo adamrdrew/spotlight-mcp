@@ -8,3 +8,4 @@ An MCP server in Swift that exposes macOS Spotlight search to LLMs via stdio JSO
 
 - [Search Module](search-module.md) — Spotlight query engine: SpotlightQuery, QueryBuilder, MetadataItem, KindMapping, types
 - [Tool Layer](tool-layer.md) — MCP tool handlers, routing, argument validation, path sanitization, pagination, logging, and error handling
+- [Release Automation](release-automation.md) — GitHub Actions workflow for building universal binaries and updating Homebrew tap
