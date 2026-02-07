@@ -1,3 +1,0 @@
-module EventSource {
-    header "/Users/adam/Development/spotlight-mcp/.build/arm64-apple-macosx/debug/EventSource.build/include/EventSource-Swift.h"
-}
