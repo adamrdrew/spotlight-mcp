@@ -1,0 +1,3 @@
+module MCP {
+    header "/Users/adam/Development/spotlight-mcp/.build/arm64-apple-macosx/debug/MCP.build/include/MCP-Swift.h"
+}

@@ -93,3 +93,22 @@
 - Tools list request receives a response with `[]` or equivalent empty array
 - Server does not crash or hang
 - Manual verification documented (can be a brief note in progress.yaml or review.md)
+
+## S007: Create Minimal README
+
+**Intent**: Satisfy L28 (README Completeness) by providing basic project documentation.
+
+**Work**:
+- Create `README.md` at repository root
+- Document build instructions: `swift build`
+- Document run instructions: `.build/debug/spotlight-mcp`
+- Describe current functionality: skeleton MCP server with stdio transport, responds to initialize and tools/list, no Spotlight functionality yet
+- Note this is a proof-of-concept skeleton phase
+- List requirements: Swift 6, macOS 13+, Swift Package Manager
+
+**Done When**:
+- README.md exists at `/Users/adam/Development/spotlight-mcp/README.md`
+- README contains clear installation and usage instructions
+- README accurately describes current (minimal) functionality
+- README documents system requirements
+- L28 compliance verified
