@@ -1,0 +1,13 @@
+[2026-02-15 12:31:20] [INFO] Pharaoh server starting {"pid":48165,"cwd":"/Users/adam/Development/spotlight-mcp"}
+[2026-02-15 12:31:20] [INFO] Pharaoh starting {"version":"unknown","cwd":"/Users/adam/Development/spotlight-mcp"}
+[2026-02-15 12:31:20] [INFO] Serving directory {"cwd":"/Users/adam/Development/spotlight-mcp","dispatchPath":"/Users/adam/Development/spotlight-mcp/.pharaoh/dispatch"}
+[2026-02-15 12:31:20] [INFO] Watcher started {"path":"/Users/adam/Development/spotlight-mcp/.pharaoh/dispatch"}
+[2026-02-15 12:31:20] [INFO] Pharaoh server ready {"dispatchPath":"/Users/adam/Development/spotlight-mcp/.pharaoh/dispatch"}
+[2026-02-15 12:31:23] [INFO] Shutting down gracefully
+[2026-02-15 12:31:23] [INFO] Shutting down gracefully
+[2026-02-15 12:31:23] [INFO] Watcher stopped
+[2026-02-15 12:31:23] [ERROR] Unhandled rejection {"message":"ENOENT: no such file or directory, unlink '/Users/adam/Development/spotlight-mcp/.pharaoh/pharaoh.lock'"}
+[2026-02-15 12:31:23] [INFO] Lock released
+[2026-02-15 12:31:23] [INFO] Shutting down gracefully
+[2026-02-15 12:31:23] [INFO] Lock released
+[2026-02-15 12:31:23] [INFO] Shutdown complete
